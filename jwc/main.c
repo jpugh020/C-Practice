@@ -1,38 +1,70 @@
+/* TODO: 
+ *	Finish flag parsing
+ *	Ensure file open and read pattern
+ *	Adjust count struct as needed
+ *
+ * */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
+
+typedef struct {
+	unsigned long bytes;
+	unsigned long words;
+	unsigned long lines;
+}Count;
+
+void countStream(FILE* stream, Count* counts) {
+	int ch, in_word;
+	in_word = 0;
+
+	while ((ch = fgetc(stream)) != EOF) {
+		counts->bytes++;
+
+		if (ch == '\n') {
+			counts->lines++;
+		}
+
+		if (isspace(ch)) {
+			in_word = 0;
+		} else if (!in_word) {
+			in_word = 1;
+			counts->words++;
+		}
+	}
+}
+
+
+
+
+
 
 int main(int argc, char* argv[]) {
 	
-	int flags, opt;
-	int nsecs, tfnd;
+	Count total = {0, 0, 0};
+	int optind, optopt;
 
-	nsecs = 0;
-	tfnd = 0;
-	flags = 0;
-	while((opt = getopt(argc, argv, "nt:")) != -1) {
+
+
+
+
+
+
+	while((opt = getopt(argc, argv, "l")) != -1) {
 
 		switch (opt) {
-			case 'n':
-				flags = 1;
-				break;
-			case 't':
-				nsecs = atoi(optarg);
-				tfnd = 1;
+			case 'l':
 				break;
 			default:
 				fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n", argv[0]);
 				exit(EXIT_FAILURE);
 		}
 	}
-	printf("flags=%d; tfnd=%d; nsecs=%d; optind=%d\n", flags, tfnd, nsecs, optind);
 
-	if (optind >= argc) {
-		fprintf(stderr, "Expected argument after options\n");
-		exit(EXIT_FAILURE);
-	}
 
-	printf("name argument = %s\n", argv[optind]);
 
 	exit(EXIT_SUCCESS);
 }
